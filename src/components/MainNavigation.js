@@ -1,49 +1,47 @@
-import React,{useState , useEffect} from 'react'
-import './MainNavigation.css'
-import {NavLink} from 'react-router-dom'
-import { useNavigate } from 'react-router-dom'
-import { useSelector , useDispatch } from 'react-redux'
+import { useDispatch } from 'react-redux';
 
+import classes from './CartItem.module.css';
+import { cartActions } from '../../store/cart-slice';
 
-import { authAction } from '../store/Auth'
+const CartItem = (props) => {
+  const dispatch = useDispatch();
 
- const MainNavigation = (props) => {
-  const navigate = useNavigate();
-  const dispatch = useDispatch()
-  const auth = useSelector((state)=>state.auth.isAuthenticated)
+  const { title, quantity, total, price, id } = props.item;
 
-  useEffect(()=>{
+  const removeItemHandler = () => {
+    dispatch(cartActions.removeItemFromCart(id));
+  };
 
-  if(localStorage.getItem('idToken')==null){
-    // setUserLogin(false)
-    dispatch(authAction.logout())
-  }else{
-    // setUserLogin(true)
-    dispatch(authAction.login())
-  }
-  } )
-  const logoutHandler=async()=>{
-    await localStorage.removeItem('idToken');
-    navigate("/login");
-    dispatch(authAction.logout())
-    alert("Logout Successful")
-  }
-  
+  const addItemHandler = () => {
+    dispatch(
+      cartActions.addItemToCart({
+        id,
+        title,
+        price,
+      })
+    );
+  };
 
   return (
-    <div className='mainNav'>
-    <nav>
-        <ul>
-            <li><NavLink to="/home">Home</NavLink> </li>
-           {auth && <li><NavLink to="/expenses">Expenses</NavLink></li>}
-            <li><NavLink to="/about">About</NavLink></li>
-            <li><NavLink to="/profile">Profile</NavLink></li>
-            {!auth && <li><NavLink to="/login">Login</NavLink></li>}
-            {auth &&<li><NavLink onClick={logoutHandler}>Logout</NavLink></li>}
-        </ul>
-    </nav>
-    </div>
-  )
-}
+    <li className={classes.item}>
+      <header>
+        <h3>{title}</h3>
+        <div className={classes.price}>
+          ${total.toFixed(2)}{' '}
+          <span className={classes.itemprice}>(${price.toFixed(2)}/item)</span>
+        </div>
+      </header>
+      <div className={classes.details}>
+        <div className={classes.quantity}>
+          x <span>{quantity}</span>
+        </div>
+        <div className={classes.actions}>
+          <button onClick={removeItemHandler}>-</button>
+          <button onClick={addItemHandler}>+</button>
+        </div>
+      </div>
+    </li>
+  );
+};
 
-export default MainNavigation
+export default CartItem;
